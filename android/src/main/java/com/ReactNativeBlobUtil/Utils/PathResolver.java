@@ -33,10 +33,11 @@ public class PathResolver {
                 final String type = split[0];
 
                 if ("primary".equalsIgnoreCase(type)) {
-                    File dir = getSDPath(context); // context.getExternalFilesDir(null);
-                    if (dir != null)
-                        return dir + "/" + split[1];
-                    return "";
+                    // File dir = context.getExternalFilesDir(null);
+                    // if (dir != null)
+                    //     return dir + "/" + split[1];
+                    String dir = getSDPath(context);
+                    return dir + "/" + split[1];
                 }
 
                 // TODO handle non-primary volumes
