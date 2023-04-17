@@ -15,6 +15,8 @@ import com.ReactNativeBlobUtil.ReactNativeBlobUtilUtils;
 import java.io.File;
 import java.io.InputStream;
 import java.io.FileOutputStream;
+import android.os.Environment;
+import java.util.Objects;
 
 public class PathResolver {
     @TargetApi(19)
