@@ -72,8 +72,9 @@ public class ReactNativeBlobUtilStream {
                 BufferedReader reader = new BufferedReader(isr, chunkSize);
                 char[] buffer = new char[chunkSize];
                 // read chunks of the string
-                while (reader.read(buffer, 0, chunkSize) != -1) {
-                    String chunk = new String(buffer);
+                int read;
+                while (read = reader.read(buffer, 0, chunkSize) != -1) {
+                    String chunk = new String(buffer,0,read);
                     emitStreamEvent(streamId, "data", chunk);
                     if (tick > 0)
                         SystemClock.sleep(tick);
