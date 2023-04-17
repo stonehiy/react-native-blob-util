@@ -31,8 +31,9 @@ public class PathResolver {
                 final String type = split[0];
 
                 if ("primary".equalsIgnoreCase(type)) {
-                    File dir = context.getExternalFilesDir(null);
-                    if (dir != null) return dir + "/" + split[1];
+                    File dir = getSDPath(context); // context.getExternalFilesDir(null);
+                    if (dir != null)
+                        return dir + "/" + split[1];
                     return "";
                 }
 
@@ -42,8 +43,8 @@ public class PathResolver {
             else if (isDownloadsDocument(uri)) {
                 try {
                     final String id = DocumentsContract.getDocumentId(uri);
-                    //Starting with Android O, this "id" is not necessarily a long (row number),
-                    //but might also be a "raw:/some/file/path" URL
+                    // Starting with Android O, this "id" is not necessarily a long (row number),
+                    // but might also be a "raw:/some/file/path" URL
                     if (id != null && id.startsWith("raw:/")) {
                         Uri rawuri = Uri.parse(id);
                         String path = rawuri.getPath();
@@ -51,7 +52,7 @@ public class PathResolver {
                     }
 
                     Long docId = null;
-                    //Since Android 10, uri can start with msf scheme like "msf:12345"
+                    // Since Android 10, uri can start with msf scheme like "msf:12345"
                     if (id != null && id.startsWith("msf:")) {
                         final String[] split = id.split(":");
                         docId = Long.valueOf(split[1]);
@@ -63,7 +64,8 @@ public class PathResolver {
                             Uri.parse("content://downloads/public_downloads"), docId);
                     return getDataColumn(context, contentUri, null, null);
                 } catch (Exception ex) {
-                    //something went wrong, but android should still be able to handle the original uri by returning null here (see readFile(...))
+                    // something went wrong, but android should still be able to handle the original
+                    // uri by returning null here (see readFile(...))
                     return null;
                 }
 
@@ -84,7 +86,7 @@ public class PathResolver {
                 }
 
                 final String selection = "_id=?";
-                final String[] selectionArgs = new String[]{
+                final String[] selectionArgs = new String[] {
                         split[1]
                 };
 
@@ -161,7 +163,7 @@ public class PathResolver {
      * @return The value of the _data column, which is typically a file path.
      */
     public static String getDataColumn(Context context, Uri uri, String selection,
-                                       String[] selectionArgs) {
+            String[] selectionArgs) {
 
         Cursor cursor = null;
         String result = null;
@@ -186,7 +188,6 @@ public class PathResolver {
         }
         return result;
     }
-
 
     /**
      * @param uri The Uri to check.
@@ -218,6 +219,26 @@ public class PathResolver {
      */
     public static boolean isGooglePhotosUri(Uri uri) {
         return "com.google.android.apps.photos.content".equals(uri.getAuthority());
+    }
+
+    // 目标SD路径：/storage/emulated/0
+    public static String getSDPath(Context context) {
+        String sdPath = "";
+        boolean isSDExist = Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED); // 判断SD卡是否存在
+        if (isSDExist) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                File externalFileRootDir = context.getExternalFilesDir(null);
+                do {
+                    externalFileRootDir = Objects.requireNonNull(externalFileRootDir).getParentFile();
+                } while (Objects.requireNonNull(externalFileRootDir).getAbsolutePath().contains("/Android"));
+                sdPath = Objects.requireNonNull(externalFileRootDir).getAbsolutePath();
+            } else {
+                sdPath = Environment.getExternalStorageDirectory().getAbsolutePath();
+            }
+        } else {
+            sdPath = Environment.getRootDirectory().toString();// 获取跟目录
+        }
+        return sdPath;
     }
 
 }
